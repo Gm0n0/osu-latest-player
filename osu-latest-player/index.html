@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#29232f">
+<title>Latest registered player · osu!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#ff66aa;--pink2:#f04b98;--bg:#28232e;--panel:#382f40;--panel2:#45394e;--text:#fff;--muted:#c2b8c9}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Nunito,Arial,sans-serif}
+.top{height:66px;background:#382f40;border-bottom:3px solid var(--pink);display:flex;align-items:center;padding:0 max(calc((100% - 1100px)/2),24px);gap:34px}
+.logo{font-size:30px;font-weight:900;letter-spacing:-2px;color:var(--pink);text-decoration:none}.logo span{color:white}
+.nav{font-size:13px;font-weight:900;color:#eee5f0;text-decoration:none;text-transform:uppercase}.nav:hover{color:var(--pink)}
+main{max-width:1050px;margin:58px auto;padding:0 22px}.eyebrow{color:var(--pink);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px}
+h1{font-size:34px;line-height:1.15;margin:5px 0 8px;font-weight:900}.sub{color:var(--muted);font-size:14px;margin-bottom:28px}
+.panel{background:var(--panel);border-radius:8px;overflow:hidden;box-shadow:0 8px 28px #0003}
+.panel-head{background:var(--panel2);padding:15px 22px;display:flex;justify-content:space-between;align-items:center;font-weight:900;font-size:13px;text-transform:uppercase}
+.pill{color:#9be6b4;font-size:11px;letter-spacing:.5px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#78d99c;margin-right:7px}
+.player{display:flex;align-items:center;gap:24px;padding:28px}.avatar{width:112px;height:112px;border-radius:6px;object-fit:cover;background:#51465b}
+.name{font-size:29px;line-height:1.2;font-weight:900;color:var(--pink);text-decoration:none;overflow-wrap:anywhere}.name:hover{color:#ff91c2}
+.id{margin-top:8px;color:var(--muted);font-size:13px}.id strong{color:#fff}
+.btn{display:inline-block;margin-top:15px;padding:9px 15px;background:var(--pink);border-radius:4px;color:white;text-decoration:none;font-size:12px;font-weight:900;text-transform:uppercase}.btn:hover{background:var(--pink2)}
+.rule{height:1px;background:#514658;margin:0 28px}.stats{padding:22px 28px 27px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.stat{background:var(--panel2);padding:16px;border-radius:5px}.label{font-size:11px;text-transform:uppercase;color:var(--muted);font-weight:900;letter-spacing:.5px}.value{font-size:18px;font-weight:900;margin-top:6px}
+.message{padding:35px 20px;text-align:center;color:var(--muted);font-size:14px}.error{color:#ff9cbd}
+.foot{text-align:center;color:#968a9e;font-size:11px;margin:28px 0 10px}.foot a{color:var(--pink);text-decoration:none}
+@media(max-width:600px){.top{gap:16px;padding:0 16px}.nav{font-size:10px}main{margin:38px auto}h1{font-size:27px}.player{align-items:flex-start;gap:16px;padding:20px}.avatar{width:86px;height:86px}.name{font-size:23px}.stats{grid-template-columns:1fr;padding:18px 20px}.rule{margin:0 20px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="logo" href="https://osu.ppy.sh/">osu<span>!</span></a>
+  <a class="nav" href="https://osu.ppy.sh/home">Home</a>
+  <a class="nav" href="https://osu.ppy.sh/community">Community</a>
+  <a class="nav" href="https://osu.ppy.sh/rankings">Rankings</a>
+</header>
+<main>
+  <div class="eyebrow">Community tracker</div>
+  <h1>Latest registered player</h1>
+  <p class="sub">The newest account discovered by this community-run tracker.</p>
+  <section class="panel">
+    <div class="panel-head"><span>Player information</span><span class="pill"><i class="dot"></i>TRACKER</span></div>
+    <div id="content" class="message" aria-live="polite">Loading player information…</div>
+  </section>
+  <div class="foot">Unofficial community project · Not affiliated with osu! or ppy Pty Ltd.<br>Data provided by the <a href="https://osu.ppy.sh/docs/">osu! API</a>.</div>
+</main>
+<script>
+const content = document.querySelector("#content");
+const safe = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+async function loadPlayer(){
+  try{
+    const response = await fetch(`./player.json?t=${Date.now()}`, {cache:"no-store"});
+    if(!response.ok) throw new Error("Player data is not available yet.");
+    const p = await response.json();
+    if(!p.id || !p.username || !p.avatar_url || !p.join_date) throw new Error("The tracker has not been initialized yet.");
+    const id = Number(p.id);
+    const profile = `https://osu.ppy.sh/users/${id}`;
+    const date = new Date(p.join_date);
+    content.className = "";
+    content.innerHTML = `
+      <div class="player">
+        <img class="avatar" src="${safe(p.avatar_url)}" alt="${safe(p.username)}'s avatar">
+        <div>
+          <a class="name" href="${profile}" target="_blank" rel="noopener">${safe(p.username)}</a>
+          <div class="id">User ID: <strong>#${id.toLocaleString()}</strong></div>
+          <a class="btn" href="${profile}" target="_blank" rel="noopener">View profile ↗</a>
+        </div>
+      </div>
+      <div class="rule"></div>
+      <div class="stats">
+        <div class="stat"><div class="label">Account ID</div><div class="value">#${id.toLocaleString()}</div></div>
+        <div class="stat"><div class="label">Registration date</div><div class="value">${safe(date.toLocaleString(undefined,{dateStyle:"long",timeStyle:"short"}))}</div></div>
+      </div>`;
+  }catch(e){
+    content.className = "message error";
+    content.textContent = e.message || "Unable to load player information.";
+  }
+}
+loadPlayer();
+setInterval(loadPlayer, 60_000);
+</script>
+</body>
+</html>
