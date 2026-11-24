@@ -1,4 +1,4 @@
-const fs = require("node:fs/promises");
+import fs from "node:fs/promises";
 
 const clientId = process.env.OSU_CLIENT_ID;
 const clientSecret = process.env.OSU_CLIENT_SECRET;
