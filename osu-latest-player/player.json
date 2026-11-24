@@ -3,7 +3,7 @@
   "username": null,
   "avatar_url": null,
   "join_date": null,
-  "last_checked_id": null,
+  "last_checked_id": 40861862,
   "updated_at": null,
   "note": "Set last_checked_id to a known recent osu! user ID before enabling the scheduled tracker."
 }
